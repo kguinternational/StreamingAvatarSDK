@@ -139,6 +139,17 @@ streamingAvatar.stopListening();
 
 ## Troubleshooting FAQ
 
+### Can I use this SDK without HeyGen?
+
+No, this SDK requires a HeyGen account and active subscription. The SDK is specifically designed to interface with HeyGen's Interactive Avatar API and cannot function independently. All avatar streaming, voice chat, and other features are powered by HeyGen's cloud services.
+
+To use this SDK, you need:
+- A HeyGen account (https://app.heygen.com)
+- An API key or Trial Token from your HeyGen account settings
+- An access token generated using your API key
+
+For more information about HeyGen's pricing and plans, visit https://www.heygen.com/pricing.
+
 ### How do I get an Access token Key?
 
 To generate your access token you must first have access to your API key. API Keys are reserved for Enterprise customers. You can retrieve either the API Key or Trial Token by logging in to HeyGen and navigating to this page in your settings: https://app.heygen.com/settings?nav=API. Afterwards you can run the following to obtain your access token.
@@ -160,3 +171,44 @@ You can create your own Interactive Avatar to use with this API by visiting labs
 Most likely, you are hitting your concurrent session limit. While testing this API with your Trial Token, only 3 concurrent sessions can be created. Please endeavor to close unused sessions with the Close Session endpoint when they are no longer being used; they will automatically close after some minutes.
 
 You can check how many active sessions you have open with the List Sessions endpoint: https://docs.heygen.com/reference/list-sessions
+
+### How can I reduce avatar lag/latency?
+
+If you're experiencing lag with the avatar stream, try the following:
+
+1. **Use lower quality settings**: Set `quality: AvatarQuality.Low` when creating the avatar session. Lower quality streams require less bandwidth and have reduced latency.
+
+   ```JS
+   const sessionInfo = await streamingAvatar.createStartAvatar({
+       quality: AvatarQuality.Low,
+       avatarName: avatarId,
+       // ... other options
+   });
+   ```
+
+2. **Check your network connection**: Ensure you have a stable internet connection. You can monitor connection quality using the `CONNECTION_QUALITY_CHANGED` event:
+
+   ```JS
+   streamingAvatar.on(StreamingEvents.CONNECTION_QUALITY_CHANGED, (quality) => {
+       console.log('Connection quality:', quality);
+   });
+   ```
+
+3. **Use LiveKit transport for voice chat**: For real-time voice interactions, LiveKit transport may provide better performance:
+
+   ```JS
+   const sessionInfo = await streamingAvatar.createStartAvatar({
+       voiceChatTransport: VoiceChatTransport.LIVEKIT,
+       // ... other options
+   });
+   ```
+
+4. **Use async task mode**: When using the `speak` method, use async mode (default) for non-blocking operations:
+
+   ```JS
+   streamingAvatar.speak({ text: text, taskMode: TaskMode.ASYNC });
+   ```
+
+5. **Reduce network congestion**: Close other bandwidth-intensive applications while using the avatar stream.
+
+6. **Check browser compatibility**: Use a modern browser (Chrome, Firefox, Edge) with WebRTC support for optimal performance.
